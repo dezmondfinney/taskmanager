@@ -1,0 +1,7 @@
+<form hx-post="/tasks/{{ task.uuid }}/update" hx-target="#task-{{ task.uuid }}" hx-swap="outerHTML" class="flex items-center justify-between w-full">
+    <input type="text" name="description" value="{{ task.description }}" class="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+    <div class="flex items-center space-x-2 ml-4">
+        <button type="submit" class="text-green-500 hover:text-green-700">Save</button>
+        <button type="button" hx-get="/tasks/{{ task.uuid }}" hx-target="#task-{{ task.uuid }}" hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700">Cancel</button>
+    </div>
+</form>
