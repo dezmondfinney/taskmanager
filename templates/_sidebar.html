@@ -1,0 +1,19 @@
+<div class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Filters</h2>
+    <nav class="space-y-2">
+        <a href="/?filter=due_today" hx-get="/" hx-target="#task-list" hx-swap="outerHTML" hx-push-url="true" class="block px-4 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">Tasks Due Today</a>
+        <div>
+            <h3 class="text-lg font-semibold mt-4 mb-2">Projects</h3>
+            <ul class="space-y-1">
+                {% for project in projects %}
+                <li>
+                    <a href="/?project={{ project }}" hx-get="/?project={{ project }}" hx-target="#task-list" hx-swap="outerHTML" hx-push-url="true" class="block px-4 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">{{ project }}</a>
+                </li>
+                {% endfor %}
+                <li>
+                    <a href="/?project=none" hx-get="/?project=none" hx-target="#task-list" hx-swap="outerHTML" hx-push-url="true" class="block px-4 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">No Project</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

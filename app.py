@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, redirect, url_for
+from flask import Flask, render_template, request, abort, redirect, url_for, make_response
 from tasklib import TaskWarrior, Task
 from datetime import datetime
 
@@ -22,7 +22,24 @@ def get_task(uuid):
 @app.route('/')
 def index():
     tasks = w.tasks.pending().filter('+PENDING')
-    return render_template('index.html', tasks=tasks)
+    projects = sorted(list(set(t['project'] for t in w.tasks.filter(project__not=''))))
+
+    # Filtering logic
+    project_filter = request.args.get('project')
+    if project_filter:
+        if project_filter == 'none':
+            tasks = tasks.filter(project__None=True)
+        else:
+            tasks = tasks.filter(project=project_filter)
+
+    other_filter = request.args.get('filter')
+    if other_filter == 'due_today':
+        tasks = tasks.filter(due__today=True)
+
+    if request.headers.get('HX-Request'):
+        return render_template('_task_list.html', tasks=tasks)
+
+    return render_template('index.html', tasks=tasks, projects=projects)
 
 @app.route('/tasks', methods=['POST'])
 def add_task():
@@ -83,10 +100,8 @@ def update_task(uuid):
         task['tags'] = []
 
     # --- Correctly handle annotations (notes) ---
-    # Remove all existing annotations by creating a copy of the list to iterate over
-    if hasattr(task, 'annotations') and task.annotations:
-        for ann in list(task.annotations):
-            task.remove_annotation(ann)
+    if hasattr(task, 'denotate'):
+        task.denotate()
 
     # Add new annotations from the form
     notes_str = request.form.get('notes', '')
@@ -97,9 +112,12 @@ def update_task(uuid):
 
     task.save()
     
-    # The form submission is an HTMX request expecting the full page content
-    tasks = w.tasks.pending().filter('+PENDING')
-    return render_template('index.html', tasks=tasks)
+    referer = request.form.get('referer', url_for('index'))
+    if request.headers.get('HX-Request'):
+        response = make_response('', 204)
+        response.headers['HX-Redirect'] = referer
+        return response
+    return redirect(referer)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8008)

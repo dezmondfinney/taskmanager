@@ -1,24 +1,67 @@
-<div id="task-{{ task.uuid }}" class="bg-white p-4 rounded-lg shadow-md mb-4 flex items-center justify-between transition-all duration-300">
-    <div class="flex items-center">
-        <input type="checkbox"
-               class="h-6 w-6 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-               hx-post="/tasks/{{ task.uuid }}/toggle"
-               hx-target="#task-{{ task.uuid }}"
-               hx-swap="outerHTML"
-               hx-trigger="change"
-               {% if task.status == 'completed' %}checked{% endif %}>
-        <span class="ml-4 text-lg {% if task.status == 'completed' %}line-through text-gray-500{% endif %}">
-            {{ task.description }}
-        </span>
+<div id="task-{{ task.uuid }}"
+     class="group/item bg-white dark:bg-gray-800/50 border border-transparent hover:border-sky-500 p-4 rounded-lg shadow-sm hover:shadow-md mb-4 flex items-start justify-between transition-all duration-300 ease-in-out"
+     style="view-transition-name: task-{{ task.uuid }};">
+
+    <div class="flex-grow">
+        <div class="flex items-center">
+            <input type="checkbox"
+                   class="h-5 w-5 rounded border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                   hx-post="/tasks/{{ task.uuid }}/toggle"
+                   hx-target="#task-{{ task.uuid }}"
+                   hx-swap="outerHTML transition:true"
+                   hx-trigger="change"
+                   {% if task.status == 'completed' %}checked{% endif %}>
+            <span class="ml-4 text-lg font-medium text-gray-800 dark:text-gray-200 {% if task.status == 'completed' %}line-through text-gray-500 dark:text-gray-400{% endif %}">
+                {{ task.description }}
+            </span>
+        </div>
+
+        <div class="pl-9 mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+            {% if task.priority == 'H' %}
+                <span class="font-bold text-red-500">!!!</span>
+            {% elif task.priority == 'M' %}
+                <span class="font-bold text-orange-500">!!</span>
+            {% elif task.priority == 'L' %}
+                <span class="font-bold text-yellow-500">!</span>
+            {% endif %}
+
+            {% if task.project %}
+                <span class="flex items-center">
+                    <svg class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path></svg>
+                    {{ task.project }}
+                </span>
+            {% endif %}
+
+            {% if task.due %}
+                <span class="flex items-center">
+                     <svg class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                    {{ task.due.strftime('%b %d') }}
+                </span>
+            {% endif %}
+
+            {% if task.tags %}
+                <div class="flex items-center space-x-2">
+                    {% for tag in task.tags %}
+                        <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-medium">
+                            {{ tag }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="flex items-center space-x-2">
-        <a href="/edit/{{ task.uuid }}" class="text-blue-500 hover:text-blue-700">Edit</a>
-        <button class="text-red-500 hover:text-red-700"
+
+    <div class="flex items-center space-x-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300">
+        <a href="/edit/{{ task.uuid }}"
+           class="text-gray-400 hover:text-sky-500 dark:text-gray-500 dark:hover:text-sky-400 p-1 rounded-md">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+        </a>
+        <button class="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 p-1 rounded-md"
                 hx-delete="/tasks/{{ task.uuid }}"
                 hx-target="#task-{{ task.uuid }}"
-                hx-swap="outerHTML"
+                hx-swap="outerHTML transition:true"
                 hx-confirm="Are you sure you want to delete this task?">
-            Delete
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
         </button>
     </div>
 </div>
