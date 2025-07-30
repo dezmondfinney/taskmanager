@@ -11,29 +11,47 @@
 </head>
 <body class="bg-gray-100 dark:bg-black text-gray-900 dark:text-white font-sans">
 
-    <div class="">
+    <div class="flex h-screen overflow-x-hidden">
+        <input type="checkbox" id="sidebar-toggle" class="hidden peer">
         <!-- Sidebar -->
-        <label for="sidebar-toggle" id="sidebar-overlay" class="bg-black/50">Menu</label>
-        <div id="sidebar" class="bg-white dark:bg-gray-800">
-            {% include '_sidebar.html' %}
-        </div>
+        <aside id="sidebar" class="bg-white dark:bg-gray-800 w-0 peer-checked:w-4/5 md:peer-checked:w-64 transition-all duration-300 ease-in-out overflow-hidden">
+            <div class="min-w-max h-full flex flex-col">
+                {% include '_sidebar.html' %}
+            </div>
+        </aside>
 
+        <!-- Main content -->
+        <div class="flex flex-col w-full peer-checked:w-1/5 md:peer-checked:w-auto md:flex-grow transition-all duration-300 ease-in-out">
             <!-- Header -->
             <header class="bg-gray-50 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800">
                 <div class="flex items-center justify-between p-4">
-                    <label for="sidebar-toggle" id="menu-toggle" class="text-gray-500 dark:text-gray-400 hover:text-blue-500 md:hidden cursor-pointer">
+                    <label for="sidebar-toggle" id="menu-toggle" class="text-gray-500 dark:text-gray-400 hover:text-blue-500 cursor-pointer">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </label>
                     <h1 class="text-xl font-semibold text-center flex-grow">Task Manager</h1>
-                    <div class="w-6"></div> <!-- Spacer to balance the header -->
                 </div>
             </header>
 
-      <!-- Main content -->
-      <main class="p-4 border">
-          {% block content %}{% endblock %}
-      </main>
+            <main class="flex-grow p-4 overflow-auto" style="min-width: 375px;">
+                <div class="overflow-hidden">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+
+            sidebar.addEventListener('click', function (event) {
+                if (event.target.tagName === 'A') {
+                    sidebarToggle.checked = false;
+                }
+            });
+        });
+    </script>
 
 </body>
 

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build:css": "tailwindcss -i ./static/css/style.css -o ./static/css/output.css --watch",
-    "dev:py": "nodemon --watch app.py --exec 'flask run --host=0.0.0.0 --port=8008'",
+    "dev:py": "nodemon --watch app.py --watch templates --ext py,html --exec 'flask run --host=0.0.0.0 --port=8008'",
     "dev": "concurrently \"npm:build:css\" \"npm:dev:py\""
   },
   "keywords": [],
