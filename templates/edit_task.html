@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Task</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% extends 'base.html' %}
+
+{% block head_extra %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-</head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+{% endblock %}
+
+{% block content %}
     <div class="container mx-auto mt-10">
         <h1 class="text-3xl font-bold mb-5 text-indigo-600 dark:text-indigo-400">Edit Task</h1>
         <form hx-post="/update/{{ task['uuid'] }}" class="bg-white dark:bg-slate-800 p-5 rounded shadow-md">
@@ -82,5 +78,4 @@
             });
         });
     </script>
-</body>
-</html>
+{% endblock %}
