@@ -34,10 +34,7 @@ def index():
 
     other_filter = request.args.get('filter')
     if other_filter == 'due_today':
-        tasks = tasks.filter(due__today=True)
-
-    if request.headers.get('HX-Request'):
-        return render_template('_task_list.html', tasks=tasks)
+        tasks = tasks.filter('due:today')
 
     return render_template('index.html', tasks=tasks, projects=projects)
 
@@ -69,7 +66,8 @@ def delete_task(uuid):
 @app.route('/edit/<uuid>', methods=['GET'])
 def edit_task_page(uuid):
     task = get_task(uuid)
-    return render_template('edit_task.html', task=task)
+    projects = sorted(list(set(t['project'] for t in w.tasks.filter(project__not=''))))
+    return render_template('edit_task.html', task=task, projects=projects)
 
 @app.route('/update/<uuid>', methods=['POST'])
 def update_task(uuid):
@@ -77,8 +75,13 @@ def update_task(uuid):
     
     task['description'] = request.form.get('description', task['description'])
     
-    project = request.form.get('project')
-    task['project'] = project if project else None
+    # Handle project select with new project option
+    project_select = request.form.get('project')
+    if project_select == '__new__':
+        project_value = request.form.get('new_project', '').strip()
+    else:
+        project_value = project_select
+    task['project'] = project_value if project_value else None
 
     due_str = request.form.get('due')
     if due_str:
@@ -100,18 +103,17 @@ def update_task(uuid):
         task['tags'] = []
 
     # --- Correctly handle annotations (notes) ---
-    if hasattr(task, 'denotate'):
-        task.denotate()
+    # Clear existing annotations
+    for ann in list(task['annotations']):
+        task.remove_annotation(ann)
 
     # Add new annotations from the form
-    notes_str = request.form.get('notes', '')
-    if notes_str:
-        for line in notes_str.splitlines():
-            if line.strip():
-                task.add_annotation(line.strip())
+    for line in request.form.get('notes', '').splitlines():
+        if line.strip():
+            task.add_annotation(line.strip())
 
     task.save()
-    
+ 
     referer = request.form.get('referer', url_for('index'))
     if request.headers.get('HX-Request'):
         response = make_response('', 204)

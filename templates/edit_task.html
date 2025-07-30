@@ -25,8 +25,15 @@
                 <input type="datetime-local" id="scheduled" name="scheduled" value="{{ task['scheduled'] | format_datetime if task['scheduled'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
             <div class="mb-4">
-                <label for="project" class="block text-gray-700 text-sm font-bold mb-2">Project</label>
-                <input type="text" id="project" name="project" value="{{ task['project'] if task['project'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <label for="project_select" class="block text-gray-700 text-sm font-bold mb-2">Project</label>
+                <select id="project_select" name="project" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="">None</option>
+                    {% for proj in projects %}
+                        <option value="{{ proj }}" {% if task['project'] == proj %}selected{% endif %}>{{ proj }}</option>
+                    {% endfor %}
+                    <option value="__new__">Add new project...</option>
+                </select>
+                <input type="text" id="new_project" name="new_project" placeholder="New project name" value="" class="mt-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline hidden">
             </div>
             <div class="mb-4">
                 <label for="tags" class="block text-gray-700 text-sm font-bold mb-2">Tags</label>
@@ -46,5 +53,16 @@
             </div>
         </form>
     </div>
+    <script>
+        document.getElementById('project_select').addEventListener('change', function() {
+            var newInput = document.getElementById('new_project');
+            if (this.value === '__new__') {
+                newInput.classList.remove('hidden');
+            } else {
+                newInput.classList.add('hidden');
+                newInput.value = '';
+            }
+        });
+    </script>
 </body>
 </html>
