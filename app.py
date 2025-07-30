@@ -10,8 +10,8 @@ w = TaskWarrior()
 def format_datetime(value):
     if not value:
         return ""
-    # Format to YYYY-MM-DDTHH:MM for datetime-local input
-    return value.strftime('%Y-%m-%dT%H:%M')
+    # Format to YYYY-MM-DD HH:MM for flatpickr
+    return value.strftime('%Y-%m-%d %H:%M')
 
 def get_task(uuid):
     task = w.tasks.get(uuid=uuid)
@@ -22,7 +22,9 @@ def get_task(uuid):
 @app.route('/')
 def index():
     tasks = w.tasks.pending().filter('+PENDING')
-    projects = sorted(list(set(t['project'] for t in w.tasks.filter(project__not=''))))
+    all_projects = (t['project'] for t in w.tasks.filter(project__not=''))
+    unique_projects = set(p for p in all_projects if p)
+    projects = sorted(list(unique_projects))
 
     # Filtering logic
     project_filter = request.args.get('project')
@@ -34,7 +36,10 @@ def index():
 
     other_filter = request.args.get('filter')
     if other_filter == 'due_today':
-        tasks = tasks.filter('due:today')
+        tasks = tasks.filter('+TODAY')
+
+    if request.headers.get('HX-Request'):
+        return render_template('_task_list.html', tasks=tasks)
 
     return render_template('index.html', tasks=tasks, projects=projects)
 
@@ -85,13 +90,13 @@ def update_task(uuid):
 
     due_str = request.form.get('due')
     if due_str:
-        task['due'] = datetime.strptime(due_str, '%Y-%m-%dT%H:%M')
+        task['due'] = datetime.strptime(due_str, '%Y-%m-%d %H:%M')
     else:
         task['due'] = None
 
     scheduled_str = request.form.get('scheduled')
     if scheduled_str:
-        task['scheduled'] = datetime.strptime(scheduled_str, '%Y-%m-%dT%H:%M')
+        task['scheduled'] = datetime.strptime(scheduled_str, '%Y-%m-%d %H:%M')
     else:
         task['scheduled'] = None
 

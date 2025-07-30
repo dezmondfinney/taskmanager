@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-axU-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Task</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto mt-10">
@@ -16,13 +18,15 @@
                 <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description</label>
                 <input type="text" id="description" name="description" value="{{ task['description'] }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
-            <div class="mb-4">
-                <label for="due" class="block text-gray-700 text-sm font-bold mb-2">Due Date</label>
-                <input type="datetime-local" id="due" name="due" value="{{ task['due'] | format_datetime if task['due'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div class="mb-4">
-                <label for="scheduled" class="block text-gray-700 text-sm font-bold mb-2">Scheduled Date</label>
-                <input type="datetime-local" id="scheduled" name="scheduled" value="{{ task['scheduled'] | format_datetime if task['scheduled'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="due" class="block text-gray-700 text-sm font-bold mb-2">Due Date</label>
+                    <input type="text" id="due" name="due" value="{{ task['due'] | format_datetime if task['due'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="scheduled" class="block text-gray-700 text-sm font-bold mb-2">Scheduled Date</label>
+                    <input type="text" id="scheduled" name="scheduled" value="{{ task['scheduled'] | format_datetime if task['scheduled'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
             </div>
             <div class="mb-4">
                 <label for="project_select" class="block text-gray-700 text-sm font-bold mb-2">Project</label>
@@ -41,7 +45,8 @@
             </div>
             <div class="mb-4">
                 <label for="notes" class="block text-gray-700 text-sm font-bold mb-2">Notes</label>
-                <textarea id="notes" name="notes" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ task.annotations | map(attribute='description') | join('\n') if task.annotations else '' }}</textarea>
+                <textarea id="notes" name="notes" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ task.annotations | map(attribute='description') | join('
+') if task.annotations else '' }}</textarea>
             </div>
             <div class="flex items-center justify-between">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
@@ -54,14 +59,27 @@
         </form>
     </div>
     <script>
-        document.getElementById('project_select').addEventListener('change', function() {
-            var newInput = document.getElementById('new_project');
-            if (this.value === '__new__') {
-                newInput.classList.remove('hidden');
-            } else {
-                newInput.classList.add('hidden');
-                newInput.value = '';
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("#due", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                allowInput: true,
+            });
+            flatpickr("#scheduled", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                allowInput: true,
+            });
+
+            document.getElementById('project_select').addEventListener('change', function() {
+                var newInput = document.getElementById('new_project');
+                if (this.value === '__new__') {
+                    newInput.classList.remove('hidden');
+                } else {
+                    newInput.classList.add('hidden');
+                    newInput.value = '';
+                }
+            });
         });
     </script>
 </body>
