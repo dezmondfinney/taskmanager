@@ -1,7 +1,95 @@
-<form hx-post="/tasks/{{ task.uuid }}/update" hx-target="#task-{{ task.uuid }}" hx-swap="outerHTML" class="flex items-center justify-between w-full">
-    <input type="text" name="description" value="{{ task.description }}" class="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-    <div class="flex items-center space-x-2 ml-4">
-        <button type="submit" class="text-green-500 hover:text-green-700">Save</button>
-        <button type="button" hx-get="/tasks/{{ task.uuid }}" hx-target="#task-{{ task.uuid }}" hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700">Cancel</button>
+<form id="edit-form"
+      hx-post="/update/{{ task.uuid }}"
+      hx-target="body"
+      hx-push-url="true"
+      class="space-y-6">
+
+    <input type="hidden" name="referer" value="{{ request.referrer or url_for('index') }}">
+
+    <!-- Description -->
+    <div class="bg-white dark:bg-gray-900/50 rounded-lg">
+        <label for="description" class="sr-only">Description</label>
+        <input type="text"
+               id="description"
+               name="description"
+               value="{{ task.description }}"
+               class="w-full p-4 bg-transparent focus:outline-none text-lg"
+               placeholder="Task description">
     </div>
+
+    <!-- Project and Tags -->
+    <div class="bg-white dark:bg-gray-900/50 rounded-lg divide-y divide-gray-200 dark:divide-gray-800">
+        <!-- Project -->
+        <div class="p-4">
+            <label for="project" class="text-gray-500 dark:text-gray-400 w-24 inline-block">Project</label>
+            <select id="project" name="project" class="bg-transparent focus:outline-none w-auto">
+                <option value="" {% if not task.project %}selected{% endif %}>None</option>
+                {% for p in projects %}
+                <option value="{{ p }}" {% if task.project == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+                <option value="__new__">New Project...</option>
+            </select>
+            <input type="text" name="new_project" class="hidden mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded w-full" placeholder="Enter new project name">
+        </div>
+
+        <!-- Tags -->
+        <div class="p-4">
+            <label for="tags" class="text-gray-500 dark:text-gray-400 w-24 inline-block">Tags</label>
+            <input type="text"
+                   id="tags"
+                   name="tags"
+                   value="{{ task.tags | join(', ') }}"
+                   class="w-auto bg-transparent focus:outline-none"
+                   placeholder="tag1, tag2">
+        </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="bg-white dark:bg-gray-900/50 rounded-lg divide-y divide-gray-200 dark:divide-gray-800">
+        <!-- Due Date -->
+        <div class="p-4 flex items-center">
+            <label for="due" class="text-gray-500 dark:text-gray-400 w-24">Due</label>
+            <input type="text"
+                   id="due"
+                   name="due"
+                   value="{{ task.due | format_datetime if task.due else '' }}"
+                   class="datetime-picker bg-transparent focus:outline-none w-full"
+                   placeholder="None">
+        </div>
+        <!-- Scheduled Date -->
+        <div class="p-4 flex items-center">
+            <label for="scheduled" class="text-gray-500 dark:text-gray-400 w-24">Scheduled</label>
+            <input type="text"
+                   id="scheduled"
+                   name="scheduled"
+                   value="{{ task.scheduled | format_datetime if task.scheduled else '' }}"
+                   class="datetime-picker bg-transparent focus:outline-none w-full"
+                   placeholder="None">
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-white dark:bg-gray-900/50 rounded-lg">
+        <label for="notes" class="sr-only">Notes</label>
+        <textarea id="notes"
+                  name="notes"
+                  rows="5"
+                  class="w-full p-4 bg-transparent focus:outline-none"
+                  placeholder="Add notes...">{{ task.annotations | map(attribute='description') | join('\n') }}</textarea>
+    </div>
+
 </form>
+
+<script>
+    // Show/hide new project input field
+    const projectSelect = document.getElementById('project');
+    const newProjectInput = document.querySelector('input[name="new_project"]');
+    projectSelect.addEventListener('change', function() {
+        if (this.value === '__new__') {
+            newProjectInput.classList.remove('hidden');
+            newProjectInput.focus();
+        } else {
+            newProjectInput.classList.add('hidden');
+        }
+    });
+</script>

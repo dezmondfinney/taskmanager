@@ -6,10 +6,32 @@
     :root {
         color-scheme: light dark;
     }
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 }
 
-@layer utilities {
-    .view-transition-name-task-item {
-        view-transition-name: task-item;
-    }
+::view-transition-old(task-item),
+::view-transition-new(task-item) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(task-item) {
+  animation-name: slide-out;
+}
+
+::view-transition-new(task-item) {
+  animation-name: slide-in;
+}
+
+@keyframes slide-in {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-20px); opacity: 0; }
 }

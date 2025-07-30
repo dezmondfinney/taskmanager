@@ -1,81 +1,37 @@
 {% extends 'base.html' %}
 
+{% block title %}Edit Task - {{ task.description }}{% endblock %}
+
 {% block head_extra %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 {% endblock %}
 
 {% block content %}
-    <div class="container mx-auto mt-10">
-        <h1 class="text-3xl font-bold mb-5 text-indigo-600 dark:text-indigo-400">Edit Task</h1>
-        <form hx-post="/update/{{ task['uuid'] }}" class="bg-white dark:bg-slate-800 p-5 rounded shadow-md">
-            <input type="hidden" name="referer" value="{{ request.headers.get('Referer', url_for('index')) }}">
-            <div class="mb-4">
-                <label for="description" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Description</label>
-                <input type="text" id="description" name="description" value="{{ task['description'] }}" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="due" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Due Date</label>
-                    <input type="text" id="due" name="due" value="{{ task['due'] | format_datetime if task['due'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="scheduled" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Scheduled Date</label>
-                    <input type="text" id="scheduled" name="scheduled" value="{{ task['scheduled'] | format_datetime if task['scheduled'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-            </div>
-            <div class="mb-4">
-                <label for="project_select" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Project</label>
-                <select id="project_select" name="project" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="">None</option>
-                    {% for proj in projects %}
-                        <option value="{{ proj }}" {% if task['project'] == proj %}selected{% endif %}>{{ proj }}</option>
-                    {% endfor %}
-                    <option value="__new__">Add new project...</option>
-                </select>
-                <input type="text" id="new_project" name="new_project" placeholder="New project name" value="" class="mt-2 shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline hidden">
-            </div>
-            <div class="mb-4">
-                <label for="tags" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Tags</label>
-                <input type="text" id="tags" name="tags" value="{{ task['tags'] | join(', ') if task['tags'] else '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div class="mb-4">
-                <label for="notes" class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">Notes</label>
-                <textarea id="notes" name="notes" class="shadow appearance-none border rounded w-full py-2 px-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 leading-tight focus:outline-none focus:shadow-outline">{{ task.annotations | map(attribute='description') | join('
-') if task.annotations else '' }}</textarea>
-            </div>
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Update Task
-                </button>
-                <a href="/" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Cancel
-                </a>
-            </div>
-        </form>
+<div class="bg-gray-100 dark:bg-black min-h-screen">
+    <!-- Sticky Header -->
+    <div class="bg-gray-50 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-4xl mx-auto flex items-center justify-between p-4">
+            <a href="{{ request.referrer or url_for('index') }}" class="text-blue-500 hover:text-blue-600">Cancel</a>
+            <h1 class="font-semibold text-center">Edit Task</h1>
+            <button type="submit" form="edit-form" class="text-blue-500 hover:text-blue-600 font-bold">Done</button>
+        </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            flatpickr("#due", {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                allowInput: true,
-            });
-            flatpickr("#scheduled", {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                allowInput: true,
-            });
 
-            document.getElementById('project_select').addEventListener('change', function() {
-                var newInput = document.getElementById('new_project');
-                if (this.value === '__new__') {
-                    newInput.classList.remove('hidden');
-                } else {
-                    newInput.classList.add('hidden');
-                    newInput.value = '';
-                }
-            });
+    <!-- Form Content -->
+    <div class="max-w-4xl mx-auto p-4">
+        {% include '_edit_form.html' %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr('.datetime-picker', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "F j, Y at h:i K",
         });
-    </script>
+    });
+</script>
 {% endblock %}
